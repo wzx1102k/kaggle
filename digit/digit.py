@@ -14,9 +14,9 @@ training_df = pd.read_csv(training_path)
 testing_df = pd.read_csv(testing_path)
 
 
-training_set = np.array(training_df.iloc[1:5000, 1:].astype('float32')) / 255
-training_labels = np.array(training_df.iloc[1:5000, :1].astype('int'))
-test_set = np.array(testing_df. iloc[1:, :].astype('float32')) / 255
+training_set = np.array(training_df.iloc[:5000, 1:].astype('float32')) / 255
+training_labels = np.array(training_df.iloc[:5000, :1].astype('int'))
+test_set = np.array(testing_df. iloc[:, :].astype('float32')) / 255
 print(training_set.shape)
 print(training_labels.shape)
 
@@ -95,7 +95,7 @@ with g.as_default():
             threads = tf.train.start_queue_runners(coord=coord)
             sess.run(init)
             tf.train.start_queue_runners(sess=sess)
-            for i in range(100):
+            for i in range(2000):
                 train_step.run(feed_dict={xs: image, ys: labels, keep_prob: 0.5})
                 cross_sess = sess.run(cross, feed_dict={xs: image, ys: labels, keep_prob: 1})
                 print(cross_sess)
