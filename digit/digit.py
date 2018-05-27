@@ -37,12 +37,12 @@ def weight_variable(name, shape):
 def bias_variable(name, shape):
     return (tf.get_variable(name, shape=shape, initializer=tf.contrib.layers.xavier_initializer()))
 
-def con2d(x, W):
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+def con2d(x, W, _name):
+    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME', name=_name)
 
-def max_pooling_2x2(x, pool_height, pool_width):
+def max_pooling_2x2(x, pool_height, pool_width, _name):
     # step change to 2
-    layer = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+    layer = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=_name)
     pool_height = pool_height//2 + pool_height%2
     pool_width = pool_width//2 + pool_width%2
     return layer, pool_height, pool_width
@@ -58,14 +58,14 @@ with g.as_default():
     with tf.device('/gpu:0'):
         W_conv1 = weight_variable('W1', [5, 5, 1, 32])
         b_conv1 = bias_variable('b1', [32])
-        h_conv1 = tf.nn.relu(tf.nn.bias_add(con2d(x_image, W_conv1), b_conv1))
-        h_pool1, pool_heigth, pool_width = max_pooling_2x2(h_conv1, pool_heigth, pool_width)  # output 14 14
+        h_conv1 = tf.nn.relu(tf.nn.bias_add(con2d(x_image, W_conv1, "conv1"), b_conv1))
+        h_pool1, pool_heigth, pool_width = max_pooling_2x2(h_conv1, pool_heigth, pool_width, "pool1")  # output 14 14
         h_pool1 = tf.nn.dropout(h_pool1, keep_prob)
 
         W_conv2 = weight_variable('W2', [5, 5, 32, 64])
         b_conv2 = bias_variable('b2', [64])
-        h_conv2 = tf.nn.relu(tf.nn.bias_add(con2d(h_pool1, W_conv2), b_conv2))
-        h_pool2, pool_heigth, pool_width = max_pooling_2x2(h_conv2, pool_heigth, pool_width)  # output 7 7
+        h_conv2 = tf.nn.relu(tf.nn.bias_add(con2d(h_pool1, W_conv2, "conv2"), b_conv2))
+        h_pool2, pool_heigth, pool_width = max_pooling_2x2(h_conv2, pool_heigth, pool_width, "pool2")  # output 7 7
         h_pool2 = tf.nn.dropout(h_pool2, keep_prob)
         h_pool2_flat = tf.reshape(h_pool2, [-1, pool_heigth * pool_width * 64])
         
