@@ -14,9 +14,9 @@ training_df = pd.read_csv(training_path)
 testing_df = pd.read_csv(testing_path)
 
 
-training_set = np.array(training_df.iloc[1:4000, 1:].astype('float32')) / 255
-training_labels = np.array(training_df.iloc[1:4000, :1].astype('int'))
-test_set = np.array(testing_df. iloc[1:10, :].astype('float32')) / 255
+training_set = np.array(training_df.iloc[1:5000, 1:].astype('float32')) / 255
+training_labels = np.array(training_df.iloc[1:5000, :1].astype('int'))
+test_set = np.array(testing_df. iloc[1:, :].astype('float32')) / 255
 print(training_set.shape)
 print(training_labels.shape)
 
