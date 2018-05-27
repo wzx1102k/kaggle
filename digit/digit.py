@@ -14,12 +14,14 @@ training_df = pd.read_csv(training_path)
 testing_df = pd.read_csv(testing_path)
 
 
-training_set = np.array(training_df.iloc[:, 1:].astype('float32')) // 255
+training_set = np.array(training_df.iloc[:, 1:].astype('float32')) / 255
 training_labels = np.array(training_df.iloc[:, :1].astype('int'))
-test_set = np.array(testing_df. iloc[:, :].astype('float32')) // 255
+test_set = np.array(testing_df. iloc[:, :].astype('float32')) / 255
 print(training_set.shape)
 print(training_labels.shape)
+
 image = training_set
+
 labels = np.zeros((image.shape[0], DIGIT_RANGE))
 
 
@@ -51,7 +53,8 @@ with g.as_default():
     x_image = tf.reshape(xs, [-1, 28, 28, 1])
     pool_heigth = IMAGE_HEIGHT
     pool_width = IMAGE_WIDTH
-    with tf.device('/gpu:0'):    
+    with tf.device('/gpu:0'):
+        W_conv1 = weight_variable('W1', [5, 5, 1, 16])
         b_conv1 = bias_variable('b1', [16])
         h_conv1 = tf.nn.relu(tf.nn.bias_add(con2d(x_image, W_conv1), b_conv1))
         h_pool1, pool_heigth, pool_width = max_pooling_2x2(h_conv1, pool_heigth, pool_width)  # output 14 14
@@ -108,3 +111,4 @@ with g.as_default():
                 writer.writerows(total)
             coord.request_stop()
             coord.join(threads)
+
