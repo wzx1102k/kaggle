@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import csv
+import cv2
 
 training_path = './train.csv'
 testing_path = './test.csv'
@@ -33,11 +34,15 @@ test_set = np.array(testing_df. iloc[:, :].astype('float32')) / 255
 
 def get_batch(reader):
     batch = reader.sample(frac=batch_rate)
-    image = np.array(batch.iloc[:, 1:].astype('float32')) / 255
+    image = np.array(batch.iloc[:, 1:].astype('uint8'))
     training_labels = np.array(batch.iloc[:, :1].astype('int'))
     label = np.zeros((image.shape[0], DIGIT_RANGE))
     for i in range(0, image.shape[0]):
         label[i, training_labels[i]] = 1
+        _img = np.reshape(image[i], (28, 28))
+        ret3, th3 = cv2.threshold(_img, 0, 255, cv2.THRESH_OTSU)
+        image[i] = np.reshape(th3, (784)).astype('float') / 255
+
     return image, label
 #print(labels)
 
