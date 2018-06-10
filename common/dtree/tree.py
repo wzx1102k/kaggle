@@ -16,27 +16,32 @@ class DTree(object):
         sub_class = sample_class.splitSamples()
 
         if sample_class.split_attr == None:
-            sample_label = utils.getMaxLabel(sample_class.samples, bPackage=True)
-            return Node(leaf_value=list(sample_class.samples[1:, 0]), leaf_label=sample_label)
+            leaf_label = utils.getMaxLabel(sample_class.samples, bPackage=True)
+            return Node(leaf_value=list(sample_class.samples[1:, 0]), leaf_label=leaf_label,
+                        label_list=sample_class.label_list)
         else:
             branch = {}
             for key in sample_class.split_label:
                 if key != -1:
                     branch[key] = self.buildTree(sub_class[key])
-            return Node(branch=branch, split_attr=sample_class.split_attr, split_label=sample_class.split_label)
+            return Node(branch=branch, split_attr=sample_class.split_attr,
+                        split_label=sample_class.split_label, label_list=sample_class.label_list)
 
     def printTree(self, tree, indent='   '):
         if tree.leaf_value != []:
-            print(indent + str(tree.leaf_value))
+            print(indent + str(tree.leaf_label) + ":" + str(tree.leaf_value))
         else:
             for i in tree.branch:
                 print(indent + str(tree.split_attr) + ":" + str(i))
                 self.printTree(tree.branch[i], indent+'   ')
 
+    def predictTree(self, tree, sample):
+        return tree.getLabel(sample)
+
 if __name__ == "__main__":
     samples =  [[1, 1, 1, 0, 1],
                 [1, 0, 0, 0, 1],
-                [0, 1, 1, 1, 0],
+                [0, 1, 1, 0, 0],
                 [1, 1, 0, 0, 1],
                 [0, 1, 0, 1, 0],
                 [1, 0, 1, 1, 1],
@@ -49,3 +54,5 @@ if __name__ == "__main__":
     sample_class = SampleClass(samples=samples, calSplitAttrFunc=utils.calMaxEntropy)
     tree = dtree.buildTree(sample_class)
     dtree.printTree(tree)
+    label = dtree.predictTree(tree, [0, 1, -1, -1])
+    print(label)

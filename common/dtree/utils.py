@@ -22,7 +22,7 @@ def getLabelCnt(samples, bPackage=False):
 
 def getColomCnt(samples, attr, bPackage=False):
     result = {}
-    _samples = np.array(samples, dtype='uint8')
+    _samples = np.array(samples, dtype='int')
     if _samples.shape[0] == 0 or _samples.shape[1] == 0:
         return None
     if bPackage == True:
@@ -38,7 +38,7 @@ def getColomCnt(samples, attr, bPackage=False):
     return result
 
 def sortSamples(samples, attr, bPackage=False):
-    _samples = np.array(samples, dtype='uint8')
+    _samples = np.array(samples, dtype='int')
     if _samples.shape[0] == 0 or _samples.shape[1] == 0:
         return None
     if bPackage == True:
@@ -50,7 +50,7 @@ def sortSamples(samples, attr, bPackage=False):
     return _sort
 
 def calEntropy(samples, attr, bPackage=False):
-    _samples = np.array(samples, dtype='uint8')
+    _samples = np.array(samples, dtype='int')
     if _samples.shape[0] == 0 or _samples.shape[1] == 0:
         return None
     if bPackage == True:
@@ -83,8 +83,43 @@ def calEntropy(samples, attr, bPackage=False):
 
     return (entropy, weight)
 
-def calMaxEntropy(samples, bPackage=False):
-    _samples = np.array(samples, dtype='uint8')
+def calGini(samples, attr, bPackage=False):
+    _samples = np.array(samples, dtype='int')
+    if _samples.shape[0] == 0 or _samples.shape[1] == 0:
+        return None
+    if bPackage == True:
+        _idx = int(np.where(_samples[0] == attr)[0]) - 1
+        _validsamples = _samples[1:, 1:]
+    else:
+        _idx = attr
+        _validsamples = _samples
+
+    attr_label = getColomCnt(samples, attr, bPackage)
+    gini = 0
+    weight = 1
+
+    if _idx == -1 or _idx == _validsamples.shape[1] - 1:
+        for key in attr_label:
+            pi = attr_label[key] / _validsamples.shape[0]
+            gini += pi**2
+        gini = 1 - gini
+    else:
+        if -1 not in attr_label:
+            unvalid_cnt = 0
+        else:
+            unvalid_cnt = attr_label[-1]
+        for key in attr_label:
+            if key != -1:
+                _subsamples = _validsamples[_validsamples[:, _idx] == key, :]
+                (_gini,  _weight) = calGini(_subsamples, -1)
+                _gini *= _subsamples.shape[0] / (_validsamples.shape[0] - unvalid_cnt)
+                gini += _gini
+        weight = (_validsamples.shape[0] - unvalid_cnt) / _validsamples.shape[0]
+
+    return (gini, weight)
+
+def calMaxGain(samples, calFunc=None, bPackage=False):
+    _samples = np.array(samples, dtype='int')
     if _samples.shape[0] == 0 or _samples.shape[1] == 0:
         return None
     if bPackage == True:
@@ -95,18 +130,28 @@ def calMaxEntropy(samples, bPackage=False):
 
     result = []
     for i in range(0, _validsamples.shape[1]):
-        result.append(calEntropy(_validsamples, i))
+        result.append(calFunc(_validsamples, i))
     if result[-1] == 0:
         return None, None
-    entropys = [(result[-1][0] - x[0])*x[1] for x in result[:-1]]
-    _max = max(entropys)
+    gain = [(result[-1][0] - x[0])*x[1] for x in result[:-1]]
+    print(result)
+    print(gain)
+    _max = max(gain)
     ### [1.0, 1.0, 1.0]
     if _max == 0.0:
         return None, None
-    _idx = entropys.index(_max)
+    _idx = gain.index(_max)
     if bPackage == True:
         _idx = _attr_list[_idx]
     return _max, _idx
+
+def calMaxEntropy(samples, bPackage=False):
+    return calMaxGain(samples, calFunc=calEntropy, bPackage=bPackage)
+
+def calMaxGini(samples, bPackage=False):
+    return calMaxGain(samples, calFunc=calGini, bPackage=bPackage)
+
+
 
 if __name__ == '__main__':
     samples =  [[1, 1, 1, 0, 1],
@@ -134,8 +179,8 @@ if __name__ == '__main__':
                    [9, 0, 0, 0, 1, 0],
                    [10, 0, 1, 1, 1, 1]]
 
-    result = sortSamples(samples, 2)
-    print(result)
+    #print(sortSamples(samples, 2))
+    #print(sortSamples(samples_p, 2, bPackage=True))
 
-    result = sortSamples(samples_p, 2, bPackage=True)
-    print(result)
+    print(calMaxEntropy(samples=samples_p, bPackage=True))
+    print(calMaxGini(samples=samples_p, bPackage=True))
