@@ -134,8 +134,8 @@ def calMaxGain(samples, calFunc=None, bPackage=False):
     if result[-1] == 0:
         return None, None
     gain = [(result[-1][0] - x[0])*x[1] for x in result[:-1]]
-    print(result)
-    print(gain)
+    #print(result)
+    #print(gain)
     _max = max(gain)
     ### [1.0, 1.0, 1.0]
     if _max == 0.0:
