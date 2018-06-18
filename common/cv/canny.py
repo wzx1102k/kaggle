@@ -115,7 +115,7 @@ def threshold(src, low, high):
     for i in range(1, rows-1):
         for j in range(1, cols-1):
             if src[i, j] > low and src[i, j] < high:
-                if np.max(src[i-1:i+1, j-1:j+1]) == 250:
+                if np.max(binary[i-1:i+1, j-1:j+1]) == 250:
                     binary[i, j] = 250
                 else:
                     binary[i, j] = 0
@@ -125,14 +125,14 @@ def Canny(src, low, high):
     gauss = Filter(src, k_gauss)
     _g, _r, _x, _y = CalGradient(gauss, k_robert_x, k_robert_y)
     limit = LimitNonMax(_g, _r, _x, _y)
-    canny = threshold(limit, 10, 40)
+    canny = threshold(limit, low, high)
     return canny
 
 if __name__ == '__main__':
     #print(Filter(src, k_gauss))
     #print(signal.convolve2d(src, k_gauss, 'same'))
     src = cv2.imread(sys.argv[1], cv2.IMREAD_GRAYSCALE)
-    canny = Canny(src, 10, 40)
+    canny = Canny(src, 20, 40)
     cv2.imwrite('canny.png', canny)
 
     '''
