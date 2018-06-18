@@ -10,26 +10,26 @@ k_gauss = np.array([[2, 4, 5, 4, 2],
               [4, 9, 12, 9, 4],
               [2, 4, 5, 4, 2]]) /139
 
-s_x = np.array([
+k_robert_x = np.array([
     [-1, 1],
     [-1, 1]
 ])
 
-s_y = np.array([
+k_robert_y = np.array([
     [1, 1],
     [-1, -1]
 ])
 
 k_sobel_x = np.array([
     [-1, 0, 1],
-    [-1, 0, 1],
+    [-2, 0, 2],
     [-1, 0, 1]
 ])
 
 k_sobel_y = np.array([
-    [1, 1, 1],
+    [1, 2, 1],
     [0, 0, 0],
-    [-1, -1, -1]
+    [-1, -2, -1]
 ])
 
 src = np.array([[1,2,3,4,5],
@@ -121,20 +121,18 @@ def threshold(src, low, high):
                     binary[i, j] = 0
     return binary
 
-
-
+def Canny(src, low, high):
+    gauss = Filter(src, k_gauss)
+    _g, _r, _x, _y = CalGradient(gauss, k_robert_x, k_robert_y)
+    limit = LimitNonMax(_g, _r, _x, _y)
+    canny = threshold(limit, 10, 40)
+    return canny
 
 if __name__ == '__main__':
     #print(Filter(src, k_gauss))
     #print(signal.convolve2d(src, k_gauss, 'same'))
     src = cv2.imread(sys.argv[1], cv2.IMREAD_GRAYSCALE)
-    gauss = Filter(src, k_gauss)
-
-    #cv2.imwrite('gauss.png', gauss)
-    _g, _r, _x, _y = CalGradient(gauss, s_x, s_y)
-    cv2.imwrite('garedient.png', _g)
-    limit = LimitNonMax(_g, _r, _x, _y)
-    canny = threshold(limit, 10, 40)
+    canny = Canny(src, 10, 40)
     cv2.imwrite('canny.png', canny)
 
     '''
